@@ -1,0 +1,56 @@
+body {
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+canvas {
+    border: 2px solid #fff;
+}
+
+#score {
+    color: #fff;
+    font-size: 2em;
+    margin-top: 20px;
+}
+
+#next {
+    border: 2px solid #fff;
+    margin-top: 20px;
+}
+
+#gameOver {
+    color: #fff;
+    font-size: 2em;
+    margin-top: 20px;
+    text-align: center;
+}
+
+#pauseButton {
+    font-size: 1em;
+    padding: 10px;
+    background-color: #fff;
+    color: #000;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+#gameOver button {
+    font-size: 1em;
+    padding: 10px;
+    background-color: #fff;
+    color: #000;
+    border: none;
+    cursor: pointer;
+}
+
+#controls {
+    color: #fff;
+    font-size: 1em;
+    margin-top: 20px;
+    text-align: center;
+}

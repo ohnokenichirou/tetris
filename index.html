@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tetris</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="tetris" width="240" height="400"></canvas>
+    <canvas id="next" width="120" height="120"></canvas>
+    <div id="score">0</div>
+    <div id="gameOver" style="display:none;">
+        <h1>Game Over</h1>
+        <p>Score: <span id="finalScore">0</span></p>
+        <button onclick="restartGame()">Restart</button>
+    </div>
+    <div id="controls">
+        <h2>操作方法</h2>
+        <p>左: 左矢印</p>
+        <p>右: 右矢印</p>
+        <p>下: 下矢印</p>
+        <p>左回転: Q</p>
+        <p>右回転: W</p>
+        <p>ホールド: C</p>
+    </div>
+    <button id="pauseButton" onclick="togglePause()">一時停止</button>
+    <script src="script.js"></script>
+</body>
+</html>
