@@ -2,16 +2,21 @@ const canvas = document.getElementById('tetris');
 const context = canvas.getContext('2d');
 
 const nextCanvas = document.getElementById('next');
-const nextContext = nextCanvas.getContext('2d');
+let nextContext;
 
 let nextPiece = createPiece('T');
 
 context.scale(20, 20);
-nextContext.scale(20, 20);
+// nextContext.scale(20, 20); // nextContext が初期化される前に実行されるため、コメントアウト
+
+window.onload = function () {
+    nextContext = nextCanvas.getContext('2d');
+    nextContext.scale(20, 20);
+}
 
 function arenaSweep() {
     let rowCount = 1;
-    outer: for (let y = arena.length -1; y > 0; --y) {
+    outer: for (let y = arena.length - 1; y > 0; --y) {
         for (let x = 0; x < arena[y].length; ++x) {
             if (arena[y][x] === 0) {
                 continue outer;
@@ -32,8 +37,8 @@ function collide(arena, player) {
     for (let y = 0; y < m.length; ++y) {
         for (let x = 0; x < m[y].length; ++x) {
             if (m[y][x] !== 0 &&
-               (arena[y + o.y] &&
-                arena[y + o.y][x + o.x]) !== 0) {
+                (arena[y + o.y] &&
+                    arena[y + o.y][x + o.x]) !== 0) {
                 return true;
             }
         }
@@ -49,8 +54,7 @@ function createMatrix(w, h) {
     return matrix;
 }
 
-function createPiece(type)
-{
+function createPiece(type) {
     if (type === 'T') {
         return [
             [0, 0, 0],
@@ -96,14 +100,14 @@ function createPiece(type)
     }
 }
 
-function drawMatrix(matrix, offset) {
+function drawMatrix(matrix, offset, context) {
     matrix.forEach((row, y) => {
         row.forEach((value, x) => {
             if (value !== 0) {
                 context.fillStyle = colors[value];
                 context.fillRect(x + offset.x,
-                                 y + offset.y,
-                                 1, 1);
+                    y + offset.y,
+                    1, 1);
             }
         });
     });
@@ -113,13 +117,17 @@ function draw() {
     context.fillStyle = '#000';
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    drawMatrix(arena, {x: 0, y: 0});
-    drawMatrix(player.matrix, player.pos);
+    drawMatrix(arena, { x: 0, y: 0 }, context);
+    drawMatrix(player.matrix, player.pos, context);
 
-    nextContext.fillStyle = '#000';
-    nextContext.fillRect(0, 0, 0, 0, nextCanvas.width, nextCanvas.height); // 修正
-    if (nextPiece) {
-        drawMatrix(nextPiece, {x: 0, y: 0});
+    if (nextContext) {
+        nextContext.fillStyle = '#000';
+        nextContext.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+        if (nextPiece) {
+            const offsetX = Math.floor(nextCanvas.width / 20 / 2 - nextPiece[0].length / 2);
+            const offsetY = Math.floor(nextCanvas.height / 20 / 2 - nextPiece.length / 2);
+            drawMatrix(nextPiece, { x: offsetX, y: offsetY }, nextContext);
+        }
     }
 }
 
@@ -140,9 +148,9 @@ function rotate(matrix, dir) {
                 matrix[x][y],
                 matrix[y][x],
             ] = [
-                matrix[y][x],
-                matrix[x][y],
-            ];
+                    matrix[y][x],
+                    matrix[x][y],
+                ];
         }
     }
 
@@ -178,6 +186,7 @@ function playerReset() {
     nextPiece = createPiece(pieces[pieces.length * Math.random() | 0]);
     player.pos.y = 0;
     player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
+    console.log('nextPiece in playerReset:', nextPiece); // デバッグ用
     if (collide(arena, player)) {
         gameOver();
     }
@@ -245,16 +254,7 @@ function update(time = 0) {
     }
 
     draw();
-    drawNextPiece();
     requestAnimationFrame(update);
-}
-
-function drawNextPiece() {
-    nextContext.fillStyle = '#000';
-    nextContext.fillRect(0, 0, 0, 0, nextCanvas.width, nextCanvas.height);
-    if (nextPiece) {
-        drawMatrix(nextPiece, {x: 0, y: 0});
-    }
 }
 
 function updateScore() {
@@ -305,7 +305,7 @@ const colors = [
 const arena = createMatrix(12, 20);
 
 const player = {
-    pos: {x: 0, y: 0},
+    pos: { x: 0, y: 0 },
     matrix: null,
     score: 0,
 };
