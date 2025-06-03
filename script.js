@@ -4,7 +4,8 @@ const context = canvas.getContext('2d');
 const nextCanvas = document.getElementById('next');
 let nextContext;
 
-let nextPiece = createPiece('T');
+const pieces = 'TJOLISZ';
+let nextPiece = createPiece(pieces[pieces.length * Math.random() | 0]);
 
 context.scale(20, 20);
 // nextContext.scale(20, 20); // nextContext が初期化される前に実行されるため、コメントアウト
@@ -181,8 +182,8 @@ function playerMove(offset) {
 }
 
 function playerReset() {
-    const pieces = 'TJOLISZ';
     player.matrix = nextPiece;
+    const pieces = 'TJOLISZ';
     nextPiece = createPiece(pieces[pieces.length * Math.random() | 0]);
     player.pos.y = 0;
     player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
