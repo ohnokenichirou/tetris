@@ -258,6 +258,9 @@ function updateScore() {
 }
 
 document.addEventListener('keydown', event => {
+    if (paused) {
+        return;
+    }
     if (event.keyCode === 37) {
         playerMove(-1);
     } else if (event.keyCode === 39) {
