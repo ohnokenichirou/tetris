@@ -3,16 +3,19 @@ const context = canvas.getContext('2d');
 
 const nextCanvas = document.getElementById('next');
 let nextContext;
+const holdCanvas = document.getElementById('hold');
+let holdContext;
 
 const pieces = 'TJOLISZ';
 let nextPiece = createPiece(pieces[pieces.length * Math.random() | 0]);
 
 context.scale(20, 20);
-// nextContext.scale(20, 20); // nextContext が初期化される前に実行されるため、コメントアウト
 
 window.onload = function () {
     nextContext = nextCanvas.getContext('2d');
     nextContext.scale(20, 20);
+    holdContext = holdCanvas.getContext('2d');
+    holdContext.scale(20, 20);
 }
 
 function arenaSweep() {
@@ -126,9 +129,17 @@ function draw() {
         nextContext.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
         if (nextPiece) {
             const offsetX = Math.floor(nextCanvas.width / 20 / 2 - nextPiece[0].length / 2);
-            const offsetY = Math.floor(nextCanvas.height / 20 / 2 - nextPiece.length / 2);
+            const offsetY = 1;
             drawMatrix(nextPiece, { x: offsetX, y: offsetY }, nextContext);
         }
+    }
+
+    if (holdContext && holdPiece) {
+        holdContext.fillStyle = '#000';
+        holdContext.fillRect(0, 0, holdCanvas.width, holdCanvas.height);
+        const offsetX = Math.floor(holdCanvas.width / 20 / 2 - holdPiece[0].length / 2);
+        const offsetY = Math.floor(holdCanvas.height / 20 / 2 - holdPiece.length / 2);
+        drawMatrix(holdPiece, { x: offsetX, y: offsetY }, holdContext); // ホールド中のピースを中央に表示
     }
 }
 
@@ -288,6 +299,7 @@ function playerHold() {
         }
         canHold = false;
     }
+    draw();
 }
 
 const colors = [
