@@ -1,12 +1,19 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Tetris</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <canvas id="tetris" width="240" height="400"></canvas>
-    <canvas id="next" width="120" height="120"></canvas>
+    <div style="display: flex; flex-direction: column; align-items: center;">
+        <div id="nextLabel">NEXT</div>
+        <canvas id="next" width="120" height="120"></canvas>
+        <div id="holdLabel">HOLD</div>
+        <canvas id="hold" width="120" height="120"></canvas>
+    </div>
     <div id="score">0</div>
     <div id="gameOver" style="display:none;">
         <h1>Game Over</h1>
@@ -25,4 +32,5 @@
     <button id="pauseButton" onclick="togglePause()">一時停止</button>
     <script src="script.js"></script>
 </body>
+
 </html>
