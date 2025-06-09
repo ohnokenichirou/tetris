@@ -262,15 +262,15 @@ let canHold = true;
 
 function getGhostPosition(arena, player) {
     let y = player.pos.y;
+    const tempPlayer = { ...player, pos: { ...player.pos } }; // player.posのコピーを作成
     while (true) {
-        player.pos.y++;
-        if (collide(arena, player)) {
-            player.pos.y--;
+        tempPlayer.pos.y++;
+        if (collide(arena, tempPlayer)) {
+            tempPlayer.pos.y--;
             break;
         }
     }
-    const ghostY = player.pos.y;
-    player.pos.y = y;
+    const ghostY = tempPlayer.pos.y;
     return ghostY;
 }
 
