@@ -284,6 +284,15 @@ document.addEventListener('keydown', event => {
         playerRotate(1);
     } else if (event.keyCode === 67) {
         playerHold();
+    } else if (event.keyCode === 32) { // Space key for hard drop
+        while (!collide(arena, player)) {
+            player.pos.y++;
+        }
+        player.pos.y--;
+        merge(arena, player);
+        playerReset();
+        arenaSweep();
+        updateScore();
     }
 });
 
