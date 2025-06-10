@@ -121,6 +121,18 @@ function draw() {
     context.fillStyle = '#000';
     context.fillRect(0, 0, canvas.width, canvas.height);
 
+    // ゴーストブロックの描画
+    const ghostY = getGhostPosition(arena, player);
+    if (ghostY !== undefined) {
+        const ghostPlayer = {
+            pos: { ...player.pos, y: ghostY },
+            matrix: player.matrix,
+        };
+        context.globalAlpha = 0.5;
+        drawMatrix(ghostPlayer.matrix, ghostPlayer.pos, context);
+        context.globalAlpha = 1;
+    }
+
     drawMatrix(arena, { x: 0, y: 0 }, context);
     drawMatrix(player.matrix, player.pos, context);
 
@@ -248,6 +260,20 @@ let dropInterval = 1000;
 let holdPiece = null;
 let canHold = true;
 
+function getGhostPosition(arena, player) {
+    let y = player.pos.y;
+    const tempPlayer = { ...player, pos: { ...player.pos } }; // player.posのコピーを作成
+    while (true) {
+        tempPlayer.pos.y++;
+        if (collide(arena, tempPlayer)) {
+            tempPlayer.pos.y--;
+            break;
+        }
+    }
+    const ghostY = tempPlayer.pos.y;
+    return ghostY;
+}
+
 let lastTime = 0;
 function update(time = 0) {
     const deltaTime = time - lastTime;
@@ -320,6 +346,7 @@ const colors = [
     '#FF8E0D',
     '#FFE138',
     '#3877FF',
+    '#808080', // ゴーストブロックの色
 ];
 
 const arena = createMatrix(12, 20);
