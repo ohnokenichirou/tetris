@@ -7,32 +7,55 @@ const holdCanvas = document.getElementById('hold');
 let holdContext;
 
 const pieces = 'TJOLISZ';
-let nextPiece = createPiece(pieces[pieces.length * Math.random() | 0]);
+let nextPiece = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
 
 context.scale(20, 20);
+
+const sounds = {
+    bgm: new Howl({
+        src: ['sounds/bgm.mp3'],
+        volume: 0.6,
+        loop: true,
+    }),
+    lineClear: new Howl({
+        src: ['sounds/line-clear.mp3'],
+        volume: 0.6,
+    }),
+    pieceMove: new Howl({
+        src: ['sounds/piece-move.mp3'],
+        volume: 0.6,
+    }),
+};
 
 window.onload = function () {
     nextContext = nextCanvas.getContext('2d');
     nextContext.scale(20, 20);
     holdContext = holdCanvas.getContext('2d');
     holdContext.scale(20, 20);
-}
+};
+
+document.getElementById('startButton').addEventListener('click', () => {
+    sounds.bgm.stop();
+    sounds.bgm.play();
+    playerReset();
+    update();
+    document.getElementById('startButton').style.display = 'none';
+});
 
 function arenaSweep() {
     let rowCount = 1;
     outer: for (let y = arena.length - 1; y > 0; --y) {
         for (let x = 0; x < arena[y].length; ++x) {
-            if (arena[y][x] === 0) {
-                continue outer;
-            }
+            if (arena[y][x] === 0) continue outer;
         }
-
         const row = arena.splice(y, 1)[0].fill(0);
         arena.unshift(row);
         ++y;
 
         player.score += rowCount * 10;
         rowCount *= 2;
+
+        sounds.lineClear.play();
     }
 }
 
@@ -52,56 +75,21 @@ function collide(arena, player) {
 
 function createMatrix(w, h) {
     const matrix = [];
-    while (h--) {
-        matrix.push(new Array(w).fill(0));
-    }
+    while (h--) matrix.push(new Array(w).fill(0));
     return matrix;
 }
 
 function createPiece(type) {
-    if (type === 'T') {
-        return [
-            [0, 0, 0],
-            [1, 1, 1],
-            [0, 1, 0],
-        ];
-    } else if (type === 'O') {
-        return [
-            [2, 2],
-            [2, 2],
-        ];
-    } else if (type === 'L') {
-        return [
-            [0, 3, 0],
-            [0, 3, 0],
-            [0, 3, 3],
-        ];
-    } else if (type === 'J') {
-        return [
-            [0, 4, 0],
-            [0, 4, 0],
-            [4, 4, 0],
-        ];
-    } else if (type === 'I') {
-        return [
-            [0, 5, 0, 0],
-            [0, 5, 0, 0],
-            [0, 5, 0, 0],
-            [0, 5, 0, 0],
-        ];
-    } else if (type === 'S') {
-        return [
-            [0, 6, 6],
-            [6, 6, 0],
-            [0, 0, 0],
-        ];
-    } else if (type === 'Z') {
-        return [
-            [7, 7, 0],
-            [0, 7, 7],
-            [0, 0, 0],
-        ];
-    }
+    const pieces = {
+        T: [[0, 0, 0], [1, 1, 1], [0, 1, 0]],
+        O: [[2, 2], [2, 2]],
+        L: [[0, 3, 0], [0, 3, 0], [0, 3, 3]],
+        J: [[0, 4, 0], [0, 4, 0], [4, 4, 0]],
+        I: [[0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0]],
+        S: [[0, 6, 6], [6, 6, 0], [0, 0, 0]],
+        Z: [[7, 7, 0], [0, 7, 7], [0, 0, 0]],
+    };
+    return pieces[type];
 }
 
 function drawMatrix(matrix, offset, context) {
@@ -109,9 +97,7 @@ function drawMatrix(matrix, offset, context) {
         row.forEach((value, x) => {
             if (value !== 0) {
                 context.fillStyle = colors[value];
-                context.fillRect(x + offset.x,
-                    y + offset.y,
-                    1, 1);
+                context.fillRect(x + offset.x, y + offset.y, 1, 1);
             }
         });
     });
@@ -139,7 +125,7 @@ function draw() {
         holdContext.fillRect(0, 0, holdCanvas.width, holdCanvas.height);
         const offsetX = Math.floor(holdCanvas.width / 20 / 2 - holdPiece[0].length / 2);
         const offsetY = Math.floor(holdCanvas.height / 20 / 2 - holdPiece.length / 2);
-        drawMatrix(holdPiece, { x: offsetX, y: offsetY }, holdContext); // ホールド中のピースを中央に表示
+        drawMatrix(holdPiece, { x: offsetX, y: offsetY }, holdContext);
     }
 }
 
@@ -156,21 +142,11 @@ function merge(arena, player) {
 function rotate(matrix, dir) {
     for (let y = 0; y < matrix.length; ++y) {
         for (let x = 0; x < y; ++x) {
-            [
-                matrix[x][y],
-                matrix[y][x],
-            ] = [
-                    matrix[y][x],
-                    matrix[x][y],
-                ];
+            [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
         }
     }
-
-    if (dir > 0) {
-        matrix.forEach(row => row.reverse());
-    } else {
-        matrix.reverse();
-    }
+    if (dir > 0) matrix.forEach(row => row.reverse());
+    else matrix.reverse();
 }
 
 function playerDrop() {
@@ -181,6 +157,7 @@ function playerDrop() {
         playerReset();
         arenaSweep();
         updateScore();
+        sounds.pieceMove.play();
     }
     dropCounter = 0;
 }
@@ -190,15 +167,14 @@ function playerMove(offset) {
     if (collide(arena, player)) {
         player.pos.x -= offset;
     }
+    sounds.pieceMove.play();
 }
 
 function playerReset() {
     player.matrix = nextPiece;
-    const pieces = 'TJOLISZ';
-    nextPiece = createPiece(pieces[pieces.length * Math.random() | 0]);
+    nextPiece = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
     player.pos.y = 0;
     player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
-    console.log('nextPiece in playerReset:', nextPiece); // デバッグ用
     if (collide(arena, player)) {
         gameOver();
     }
@@ -212,12 +188,15 @@ function gameOver() {
     player.score = 0;
     updateScore();
     player.matrix = null;
+    sounds.bgm.stop();
 }
 
 function restartGame() {
     document.getElementById('gameOver').style.display = 'none';
     playerReset();
     update();
+    sounds.bgm.stop();
+    sounds.bgm.play();
 }
 
 let paused = false;
@@ -225,6 +204,12 @@ function togglePause() {
     paused = !paused;
     const button = document.getElementById('pauseButton');
     button.innerText = paused ? '再開' : '一時停止';
+    if (paused) {
+        sounds.bgm.pause();
+    } else {
+        sounds.bgm.stop();
+        sounds.bgm.play();
+    }
 }
 
 function playerRotate(dir) {
@@ -240,6 +225,7 @@ function playerRotate(dir) {
             return;
         }
     }
+    sounds.pieceMove.play();
 }
 
 let dropCounter = 0;
@@ -252,14 +238,12 @@ let lastTime = 0;
 function update(time = 0) {
     const deltaTime = time - lastTime;
     lastTime = time;
-
     if (!paused) {
         dropCounter += deltaTime;
         if (dropCounter > dropInterval) {
             playerDrop();
         }
     }
-
     draw();
     requestAnimationFrame(update);
 }
@@ -269,30 +253,21 @@ function updateScore() {
 }
 
 document.addEventListener('keydown', event => {
-    if (paused) {
-        return;
-    }
-    if (event.keyCode === 37) {
-        playerMove(-1);
-    } else if (event.keyCode === 39) {
-        playerMove(1);
-    } else if (event.keyCode === 40) {
-        playerDrop();
-    } else if (event.keyCode === 81) {
-        playerRotate(-1);
-    } else if (event.keyCode === 87) {
-        playerRotate(1);
-    } else if (event.keyCode === 67) {
-        playerHold();
-    } else if (event.keyCode === 32) { // Space key for hard drop
-        while (!collide(arena, player)) {
-            player.pos.y++;
-        }
+    if (paused) return;
+    if (event.keyCode === 37) playerMove(-1);
+    else if (event.keyCode === 39) playerMove(1);
+    else if (event.keyCode === 40) playerDrop();
+    else if (event.keyCode === 81) playerRotate(-1);
+    else if (event.keyCode === 87) playerRotate(1);
+    else if (event.keyCode === 67) playerHold();
+    else if (event.keyCode === 32) {
+        while (!collide(arena, player)) player.pos.y++;
         player.pos.y--;
         merge(arena, player);
         playerReset();
         arenaSweep();
         updateScore();
+        sounds.pieceMove.play();
     }
 });
 
@@ -329,7 +304,3 @@ const player = {
     matrix: null,
     score: 0,
 };
-
-playerReset();
-updateScore();
-update();
