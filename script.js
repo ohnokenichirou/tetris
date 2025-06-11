@@ -283,6 +283,13 @@ function update(time = 0) {
         dropCounter += deltaTime;
         if (dropCounter > dropInterval) {
             playerDrop();
+            dropCounter = 0; // dropCounterをリセット
+            // スコアに応じてスピードアップ
+            if (player.score > 50 && dropInterval > 500) {
+                dropInterval -= 200;
+            } else if (player.score > 200 && dropInterval > 300) {
+                dropInterval -= 200;
+            }
         }
     }
 
