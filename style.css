@@ -48,16 +48,6 @@ canvas {
     text-align: center;
 }
 
-#pauseButton {
-    font-size: 1em;
-    padding: 10px;
-    background-color: #fff;
-    color: #000;
-    border: none;
-    cursor: pointer;
-    margin-top: 20px;
-}
-
 #gameOver button {
     font-size: 1em;
     padding: 10px;
@@ -65,6 +55,17 @@ canvas {
     color: #000;
     border: none;
     cursor: pointer;
+    margin-top: 10px;
+}
+
+#pauseButton {
+    font-size: 1em;
+    padding: 10px 20px;
+    background-color: #fff;
+    color: #000;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
 }
 
 #controls {
@@ -72,4 +73,25 @@ canvas {
     font-size: 1em;
     margin-top: 20px;
     text-align: center;
+}
+
+/* Start ボタンのスタイル */
+#startButton {
+    font-size: 1.2em;
+    padding: 12px 24px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+#startButton:hover {
+    background-color: #45a049;
+}
+
+#startButton:active {
+    background-color: #3e8e41;
 }
