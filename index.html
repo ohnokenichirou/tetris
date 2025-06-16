@@ -30,10 +30,16 @@
         <p>ホールド: C</p>
         <p>ハードドロップ: スペース</p>
     </div>
-    <button id="pauseButton" onclick="togglePause()">一時停止</button>
+    <div style="display: flex; flex-direction: column; align-items: center;">
+        <!-- サウンドと一時停止 -->
+        <button id="soundButton" onclick="toggleSound()">
+            <img id="soundIcon" src="images/sound-on.png" alt="サウンドON" width="32" height="32">
+        </button>
+        <button id="pauseButton" onclick="togglePause()">一時停止</button>
 
-    <button id="startButton">ゲームスタート</button>
-
+        <!-- スタートボタン -->
+        <button id="startButton">ゲームスタート</button>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
     <script src="script.js"></script>
 </body>

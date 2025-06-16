@@ -14,24 +14,58 @@ context.scale(20, 20);
 const sounds = {
     bgm: new Howl({
         src: ['sounds/bgm.mp3'],
-        volume: 0.6,
+        volume: 0.4,
         loop: true,
     }),
     lineClear: new Howl({
         src: ['sounds/line-clear.mp3'],
-        volume: 0.6,
+        volume: 0.4,
     }),
     pieceMove: new Howl({
         src: ['sounds/piece-move.mp3'],
-        volume: 0.6,
+        volume: 0.4,
+    }),
+    pieceRotate: new Howl({ // 回転音を追加
+        src: ['sounds/piece-rotate.mp3'],
+        volume: 0.4,
+    }),
+    piecePlace: new Howl({ // 設置音を追加
+        src: ['sounds/piece-place.mp3'],
+        volume: 0.4,
     }),
 };
+
+let isSoundMuted = localStorage.getItem('isSoundMuted') === 'true' || false;
+
+function updateSoundButtonImage() {
+    const icon = document.getElementById('soundIcon');
+    icon.src = isSoundMuted ? 'images/sound-off.png' : 'images/sound-on.png';
+}
+
+function toggleSound() {
+    isSoundMuted = !isSoundMuted;
+    localStorage.setItem('isSoundMuted', isSoundMuted);
+    for (const soundKey in sounds) {
+        if (sounds.hasOwnProperty(soundKey)) {
+            sounds[soundKey].mute(isSoundMuted);
+        }
+    }
+    updateSoundButtonImage();
+}
 
 window.onload = function () {
     nextContext = nextCanvas.getContext('2d');
     nextContext.scale(20, 20);
     holdContext = holdCanvas.getContext('2d');
     holdContext.scale(20, 20);
+
+    for (const soundKey in sounds) {
+        if (sounds.hasOwnProperty(soundKey)) {
+            sounds[soundKey].mute(isSoundMuted);
+        }
+    }
+    updateSoundButtonImage();
+    document.getElementById('pauseButton').style.display = 'none';
 };
 
 document.getElementById('startButton').addEventListener('click', () => {
@@ -40,7 +74,21 @@ document.getElementById('startButton').addEventListener('click', () => {
     playerReset();
     update();
     document.getElementById('startButton').style.display = 'none';
+    document.getElementById('pauseButton').style.display = 'block';
 });
+
+let paused = false;
+
+function togglePause() {
+    paused = !paused;
+    const button = document.getElementById('pauseButton');
+    button.innerText = paused ? '再開' : '一時停止';
+    if (paused) {
+        sounds.bgm.pause();
+    } else {
+        sounds.bgm.play();
+    }
+}
 
 function arenaSweep() {
     let rowCount = 1;
@@ -169,7 +217,7 @@ function playerDrop() {
         playerReset();
         arenaSweep();
         updateScore();
-        sounds.pieceMove.play();
+        sounds.piecePlace.play(); // 設置音を再生
     }
     dropCounter = 0;
 }
@@ -179,7 +227,7 @@ function playerMove(offset) {
     if (collide(arena, player)) {
         player.pos.x -= offset;
     }
-    sounds.pieceMove.play();
+    sounds.pieceMove.play(); // 移動音を再生
 }
 
 function playerReset() {
@@ -211,19 +259,6 @@ function restartGame() {
     sounds.bgm.play();
 }
 
-let paused = false;
-function togglePause() {
-    paused = !paused;
-    const button = document.getElementById('pauseButton');
-    button.innerText = paused ? '再開' : '一時停止';
-    if (paused) {
-        sounds.bgm.pause();
-    } else {
-        sounds.bgm.stop();
-        sounds.bgm.play();
-    }
-}
-
 function playerRotate(dir) {
     const pos = player.pos.x;
     let offset = 1;
@@ -237,7 +272,7 @@ function playerRotate(dir) {
             return;
         }
     }
-    sounds.pieceMove.play();
+    sounds.pieceRotate.play(); // 回転音を再生
 }
 
 let dropCounter = 0;
@@ -289,7 +324,10 @@ document.addEventListener('keydown', event => {
     if (paused) return;
     if (event.keyCode === 37) playerMove(-1);
     else if (event.keyCode === 39) playerMove(1);
-    else if (event.keyCode === 40) playerDrop();
+    else if (event.keyCode === 40) {
+        playerDrop();
+        sounds.pieceMove.play(); // 移動音を再生
+    }
     else if (event.keyCode === 81) playerRotate(-1);
     else if (event.keyCode === 87) playerRotate(1);
     else if (event.keyCode === 67) playerHold();
@@ -300,7 +338,7 @@ document.addEventListener('keydown', event => {
         playerReset();
         arenaSweep();
         updateScore();
-        sounds.pieceMove.play();
+        sounds.piecePlace.play(); // 設置音を再生
     }
 });
 
