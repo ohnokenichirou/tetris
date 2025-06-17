@@ -19,7 +19,7 @@ const sounds = {
     }),
     lineClear: new Howl({
         src: ['sounds/line-clear.mp3'],
-        volume: 0.4,
+        volume: 0.1,
     }),
     pieceMove: new Howl({
         src: ['sounds/piece-move.mp3'],
@@ -31,7 +31,7 @@ const sounds = {
     }),
     piecePlace: new Howl({ // 設置音を追加
         src: ['sounds/piece-place.mp3'],
-        volume: 0.4,
+        volume: 0.1,
     }),
 };
 
@@ -66,6 +66,11 @@ window.onload = function () {
     }
     updateSoundButtonImage();
     document.getElementById('pauseButton').style.display = 'none';
+    document.body.addEventListener('keydown', e => {
+        if (document.activeElement.tagName === 'BUTTON') {
+            document.activeElement.blur();
+        }
+    });
 };
 
 document.getElementById('startButton').addEventListener('click', () => {
@@ -86,7 +91,9 @@ function togglePause() {
     if (paused) {
         sounds.bgm.pause();
     } else {
-        sounds.bgm.play();
+        if (!sounds.bgm.playing()) {
+            sounds.bgm.play();
+        }
     }
 }
 
@@ -252,11 +259,16 @@ function gameOver() {
 }
 
 function restartGame() {
+    paused = false;
+    document.getElementById('pauseButton').innerText = '一時停止';
     document.getElementById('gameOver').style.display = 'none';
     playerReset();
     update();
-    sounds.bgm.stop();
-    sounds.bgm.play();
+
+    if (!sounds.bgm.playing()) {
+        sounds.bgm.stop();
+        sounds.bgm.play();
+    }
 }
 
 function playerRotate(dir) {
