@@ -388,3 +388,51 @@ const player = {
     matrix: null,
     score: 0,
 };
+
+let touchStartX = null;
+let touchStartY = null;
+let touchStartTime = null;
+
+canvas.addEventListener('touchstart', e => {
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    touchStartTime = Date.now();
+}, { passive: true });
+
+canvas.addEventListener('touchend', e => {
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - touchStartX;
+    const dy = touch.clientY - touchStartY;
+    const dt = Date.now() - touchStartTime;
+
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+
+    const swipeThreshold = 30; // 最小スワイプ距離
+    const longPressThreshold = 500; // 長押し判定（ミリ秒）
+
+    if (absDx > absDy && absDx > swipeThreshold) {
+        // 横スワイプ
+        if (dx > 0) playerMove(1);  // 右
+        else playerMove(-1);        // 左
+    } else if (absDy > absDx && absDy > swipeThreshold) {
+        // 縦スワイプ
+        if (dy > 0) {
+            playerDrop();           // 下
+            sounds.pieceMove.play();
+        }
+    } else if (dt >= longPressThreshold) {
+        // 長押し → ハードドロップ
+        while (!collide(arena, player)) player.pos.y++;
+        player.pos.y--;
+        merge(arena, player);
+        playerReset();
+        arenaSweep();
+        updateScore();
+        sounds.piecePlace.play();
+    } else {
+        // 短タップ → 右回転
+        playerRotate(1);
+    }
+}, { passive: true });
