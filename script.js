@@ -71,6 +71,11 @@ window.onload = function () {
             document.activeElement.blur();
         }
     });
+
+    // スマホ画面の場合のみモバイルコントロールを表示
+    if (window.innerWidth <= 768) { // 768px以下をスマホと仮定
+        document.getElementById('mobileControls').style.display = 'flex';
+    }
 };
 
 document.getElementById('startButton').addEventListener('click', () => {
@@ -80,6 +85,10 @@ document.getElementById('startButton').addEventListener('click', () => {
     update();
     document.getElementById('startButton').style.display = 'none';
     document.getElementById('pauseButton').style.display = 'block';
+    // スマホ画面の場合のみモバイルコントロールを表示
+    if (window.innerWidth <= 768) { // 768px以下をスマホと仮定
+        document.getElementById('mobileControls').style.display = 'flex';
+    }
 });
 
 let paused = false;
@@ -256,6 +265,15 @@ function gameOver() {
     updateScore();
     player.matrix = null;
     sounds.bgm.stop();
+
+    document.getElementById('tetris').style.display = 'none';
+    document.getElementById('score').style.display = 'none';
+    document.getElementById('sidePanel').style.display = 'none';
+    document.getElementById('mobileControls').style.display = 'none';
+    document.getElementById('controls').style.display = 'none';
+    document.getElementById('soundButton').style.display = 'none';
+    document.getElementById('pauseButton').style.display = 'none';
+    document.getElementById('startButton').style.display = 'none';
 }
 
 function restartGame() {
@@ -269,6 +287,18 @@ function restartGame() {
         sounds.bgm.stop();
         sounds.bgm.play();
     }
+    document.getElementById('tetris').style.display = 'block';
+    document.getElementById('score').style.display = 'block';
+    document.getElementById('sidePanel').style.display = 'flex';
+    // スマホ画面の場合のみモバイルコントロールを表示
+    if (window.innerWidth <= 768) { // 768px以下をスマホと仮定
+        document.getElementById('mobileControls').style.display = 'flex';
+    }
+    document.getElementById('controls').style.display = 'block';
+    document.getElementById('controls').style.display = 'none';
+    document.getElementById('soundButton').style.display = 'block';
+    document.getElementById('pauseButton').style.display = 'block';
+    document.getElementById('startButton').style.display = 'none';
 }
 
 function playerRotate(dir) {
@@ -389,41 +419,27 @@ const player = {
     score: 0,
 };
 
-let touchStartX = null;
-let touchStartY = null;
-let touchStartTime = null;
+document.getElementById('leftBtn').addEventListener('click', () => {
+    if (!paused) playerMove(-1);
+});
 
-canvas.addEventListener('touchstart', e => {
-    const touch = e.touches[0];
-    touchStartX = touch.clientX;
-    touchStartY = touch.clientY;
-    touchStartTime = Date.now();
-}, { passive: true });
+document.getElementById('rightBtn').addEventListener('click', () => {
+    if (!paused) playerMove(1);
+});
 
-canvas.addEventListener('touchend', e => {
-    const touch = e.changedTouches[0];
-    const dx = touch.clientX - touchStartX;
-    const dy = touch.clientY - touchStartY;
-    const dt = Date.now() - touchStartTime;
+document.getElementById('downBtn').addEventListener('click', () => {
+    if (!paused) {
+        playerDrop();
+        sounds.pieceMove.play();
+    }
+});
 
-    const absDx = Math.abs(dx);
-    const absDy = Math.abs(dy);
+document.getElementById('rotateBtn').addEventListener('click', () => {
+    if (!paused) playerRotate(1);
+});
 
-    const swipeThreshold = 30; // 最小スワイプ距離
-    const longPressThreshold = 500; // 長押し判定（ミリ秒）
-
-    if (absDx > absDy && absDx > swipeThreshold) {
-        // 横スワイプ
-        if (dx > 0) playerMove(1);  // 右
-        else playerMove(-1);        // 左
-    } else if (absDy > absDx && absDy > swipeThreshold) {
-        // 縦スワイプ
-        if (dy > 0) {
-            playerDrop();           // 下
-            sounds.pieceMove.play();
-        }
-    } else if (dt >= longPressThreshold) {
-        // 長押し → ハードドロップ
+document.getElementById('dropBtn').addEventListener('click', () => {
+    if (!paused) {
         while (!collide(arena, player)) player.pos.y++;
         player.pos.y--;
         merge(arena, player);
@@ -431,8 +447,9 @@ canvas.addEventListener('touchend', e => {
         arenaSweep();
         updateScore();
         sounds.piecePlace.play();
-    } else {
-        // 短タップ → 右回転
-        playerRotate(1);
     }
-}, { passive: true });
+});
+
+document.getElementById('holdBtn').addEventListener('click', () => {
+    if (!paused) playerHold();
+});
