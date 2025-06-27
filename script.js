@@ -71,6 +71,11 @@ window.onload = function () {
             document.activeElement.blur();
         }
     });
+
+    // スマホ画面の場合のみモバイルコントロールを表示
+    if (window.innerWidth <= 768) { // 768px以下をスマホと仮定
+        document.getElementById('mobileControls').style.display = 'flex';
+    }
 };
 
 document.getElementById('startButton').addEventListener('click', () => {
@@ -80,6 +85,10 @@ document.getElementById('startButton').addEventListener('click', () => {
     update();
     document.getElementById('startButton').style.display = 'none';
     document.getElementById('pauseButton').style.display = 'block';
+    // スマホ画面の場合のみモバイルコントロールを表示
+    if (window.innerWidth <= 768) { // 768px以下をスマホと仮定
+        document.getElementById('mobileControls').style.display = 'flex';
+    }
 });
 
 let paused = false;
@@ -256,6 +265,15 @@ function gameOver() {
     updateScore();
     player.matrix = null;
     sounds.bgm.stop();
+
+    document.getElementById('tetris').style.display = 'none';
+    document.getElementById('score').style.display = 'none';
+    document.getElementById('sidePanel').style.display = 'none';
+    document.getElementById('mobileControls').style.display = 'none';
+    document.getElementById('controls').style.display = 'none';
+    document.getElementById('soundButton').style.display = 'none';
+    document.getElementById('pauseButton').style.display = 'none';
+    document.getElementById('startButton').style.display = 'none';
 }
 
 function restartGame() {
@@ -269,6 +287,18 @@ function restartGame() {
         sounds.bgm.stop();
         sounds.bgm.play();
     }
+    document.getElementById('tetris').style.display = 'block';
+    document.getElementById('score').style.display = 'block';
+    document.getElementById('sidePanel').style.display = 'flex';
+    // スマホ画面の場合のみモバイルコントロールを表示
+    if (window.innerWidth <= 768) { // 768px以下をスマホと仮定
+        document.getElementById('mobileControls').style.display = 'flex';
+    }
+    document.getElementById('controls').style.display = 'block';
+    document.getElementById('controls').style.display = 'none';
+    document.getElementById('soundButton').style.display = 'block';
+    document.getElementById('pauseButton').style.display = 'block';
+    document.getElementById('startButton').style.display = 'none';
 }
 
 function playerRotate(dir) {
@@ -388,3 +418,38 @@ const player = {
     matrix: null,
     score: 0,
 };
+
+document.getElementById('leftBtn').addEventListener('click', () => {
+    if (!paused) playerMove(-1);
+});
+
+document.getElementById('rightBtn').addEventListener('click', () => {
+    if (!paused) playerMove(1);
+});
+
+document.getElementById('downBtn').addEventListener('click', () => {
+    if (!paused) {
+        playerDrop();
+        sounds.pieceMove.play();
+    }
+});
+
+document.getElementById('rotateBtn').addEventListener('click', () => {
+    if (!paused) playerRotate(1);
+});
+
+document.getElementById('dropBtn').addEventListener('click', () => {
+    if (!paused) {
+        while (!collide(arena, player)) player.pos.y++;
+        player.pos.y--;
+        merge(arena, player);
+        playerReset();
+        arenaSweep();
+        updateScore();
+        sounds.piecePlace.play();
+    }
+});
+
+document.getElementById('holdBtn').addEventListener('click', () => {
+    if (!paused) playerHold();
+});
