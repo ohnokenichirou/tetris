@@ -20,6 +20,8 @@ canvas {
     color: #fff;
     font-size: 2em;
     margin-top: 5px;
+    text-align: right;
+    min-width: 6ch;
 }
 
 #nextLabel,
