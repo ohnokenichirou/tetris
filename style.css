@@ -20,6 +20,8 @@ canvas {
     color: #fff;
     font-size: 2em;
     margin-top: 5px;
+    text-align: right;
+    min-width: 6ch;
 }
 
 #nextLabel,
@@ -48,8 +50,15 @@ canvas {
     background-color: #fff;
     color: #000;
     border: none;
+    border-radius: 8px;
     cursor: pointer;
     margin-top: 10px;
+}
+
+#soundButton {
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
 #pauseButton {
@@ -58,8 +67,11 @@ canvas {
     background-color: #fff;
     color: #000;
     border: none;
+    border-radius: 8px;
     cursor: pointer;
     margin-top: 20px;
+    height: 60px;
+    width: 120px;
 }
 
 #controls {
@@ -70,8 +82,8 @@ canvas {
 }
 
 #startButton {
-    font-size: 1.2em;
-    padding: 12px 24px;
+    font-size: 1em;
+    padding: 10px 20px;
     background-color: #4CAF50;
     color: white;
     border: none;
@@ -79,6 +91,8 @@ canvas {
     cursor: pointer;
     margin-top: 20px;
     transition: background-color 0.3s ease;
+    height: 60px;
+    width: 120px;
 }
 
 #startButton:hover {
