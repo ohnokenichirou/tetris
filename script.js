@@ -71,10 +71,11 @@ window.onload = function () {
             document.activeElement.blur();
         }
     });
-
-    // スマホ画面の場合のみモバイルコントロールを表示
     if (window.innerWidth <= 768) { // 768px以下をスマホと仮定
+        document.getElementById('startButton').innerText = 'ゲームスタート';
         document.getElementById('mobileControls').style.display = 'flex';
+    } else {
+        document.getElementById('startButton').innerText = 'ゲーム\nスタート';
     }
 };
 
@@ -85,7 +86,6 @@ document.getElementById('startButton').addEventListener('click', () => {
     update();
     document.getElementById('startButton').style.display = 'none';
     document.getElementById('pauseButton').style.display = 'block';
-    // スマホ画面の場合のみモバイルコントロールを表示
     if (window.innerWidth <= 768) { // 768px以下をスマホと仮定
         document.getElementById('mobileControls').style.display = 'flex';
     }
@@ -290,15 +290,14 @@ function restartGame() {
     document.getElementById('tetris').style.display = 'block';
     document.getElementById('score').style.display = 'block';
     document.getElementById('sidePanel').style.display = 'flex';
-    // スマホ画面の場合のみモバイルコントロールを表示
-    if (window.innerWidth <= 768) { // 768px以下をスマホと仮定
-        document.getElementById('mobileControls').style.display = 'flex';
-    }
     document.getElementById('controls').style.display = 'block';
-    document.getElementById('controls').style.display = 'none';
     document.getElementById('soundButton').style.display = 'block';
     document.getElementById('pauseButton').style.display = 'block';
     document.getElementById('startButton').style.display = 'none';
+    if (window.innerWidth <= 768) { // 768px以下をスマホと仮定
+        document.getElementById('mobileControls').style.display = 'flex';
+        document.getElementById('controls').style.display = 'none';
+    }
 }
 
 function playerRotate(dir) {
