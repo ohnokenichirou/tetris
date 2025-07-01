@@ -283,6 +283,9 @@ function restartGame() {
     playerReset();
     update();
 
+    // 落下速度を初期化
+    dropInterval = 1000;
+
     if (!sounds.bgm.playing()) {
         sounds.bgm.stop();
         sounds.bgm.play();
