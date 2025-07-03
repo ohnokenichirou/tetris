@@ -96,6 +96,8 @@ window.onload = function () {
 };
 
 document.getElementById('startButton').addEventListener('click', () => {
+    refillBag();
+    nextPiece = createNextPiece();
     sounds.bgm.stop();
     sounds.bgm.play();
     playerReset();
@@ -284,6 +286,8 @@ function gameOver() {
 
 function restartGame() {
     paused = false;
+    refillBag();
+    nextPiece = createNextPiece();
     document.getElementById('pauseButton').innerText = '一時停止';
     document.getElementById('gameOver').style.display = 'none';
     playerReset();
