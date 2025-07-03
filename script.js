@@ -7,7 +7,23 @@ const holdCanvas = document.getElementById('hold');
 let holdContext;
 
 const pieces = 'TJOLISZ';
-let nextPiece = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
+let bag = []; // 7種ピースを管理するバッグ
+
+function refillBag() {
+    bag = pieces.split('');
+    for (let i = bag.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [bag[i], bag[j]] = [bag[j], bag[i]];
+    }
+}
+
+function createNextPiece() {
+    if (bag.length === 0) refillBag();
+    const type = bag.pop();
+    return createPiece(type);
+}
+
+let nextPiece = createNextPiece();
 
 context.scale(20, 20);
 
@@ -25,11 +41,11 @@ const sounds = {
         src: ['sounds/piece-move.mp3'],
         volume: 0.4,
     }),
-    pieceRotate: new Howl({ // 回転音を追加
+    pieceRotate: new Howl({
         src: ['sounds/piece-rotate.mp3'],
         volume: 0.4,
     }),
-    piecePlace: new Howl({ // 設置音を追加
+    piecePlace: new Howl({
         src: ['sounds/piece-place.mp3'],
         volume: 0.1,
     }),
@@ -71,7 +87,7 @@ window.onload = function () {
             document.activeElement.blur();
         }
     });
-    if (window.innerWidth <= 768) { // 768px以下をスマホと仮定
+    if (window.innerWidth <= 768) {
         document.getElementById('startButton').innerText = 'ゲームスタート';
         document.getElementById('mobileControls').style.display = 'flex';
     } else {
@@ -80,13 +96,15 @@ window.onload = function () {
 };
 
 document.getElementById('startButton').addEventListener('click', () => {
+    refillBag();
+    nextPiece = createNextPiece();
     sounds.bgm.stop();
     sounds.bgm.play();
     playerReset();
     update();
     document.getElementById('startButton').style.display = 'none';
     document.getElementById('pauseButton').style.display = 'block';
-    if (window.innerWidth <= 768) { // 768px以下をスマホと仮定
+    if (window.innerWidth <= 768) {
         document.getElementById('mobileControls').style.display = 'flex';
     }
 });
@@ -127,9 +145,7 @@ function collide(arena, player) {
     const [m, o] = [player.matrix, player.pos];
     for (let y = 0; y < m.length; ++y) {
         for (let x = 0; x < m[y].length; ++x) {
-            if (m[y][x] !== 0 &&
-                (arena[y + o.y] &&
-                    arena[y + o.y][x + o.x]) !== 0) {
+            if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
                 return true;
             }
         }
@@ -171,13 +187,9 @@ function draw() {
     context.fillStyle = '#000';
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    // ゴーストブロックの描画
     const ghostY = getGhostPosition(arena, player);
     if (ghostY !== undefined) {
-        const ghostPlayer = {
-            pos: { ...player.pos, y: ghostY },
-            matrix: player.matrix,
-        };
+        const ghostPlayer = { pos: { ...player.pos, y: ghostY }, matrix: player.matrix };
         context.globalAlpha = 0.5;
         drawMatrix(ghostPlayer.matrix, ghostPlayer.pos, context);
         context.globalAlpha = 1;
@@ -233,27 +245,23 @@ function playerDrop() {
         playerReset();
         arenaSweep();
         updateScore();
-        sounds.piecePlace.play(); // 設置音を再生
+        sounds.piecePlace.play();
     }
     dropCounter = 0;
 }
 
 function playerMove(offset) {
     player.pos.x += offset;
-    if (collide(arena, player)) {
-        player.pos.x -= offset;
-    }
-    sounds.pieceMove.play(); // 移動音を再生
+    if (collide(arena, player)) player.pos.x -= offset;
+    sounds.pieceMove.play();
 }
 
 function playerReset() {
     player.matrix = nextPiece;
-    nextPiece = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
+    nextPiece = createNextPiece();
     player.pos.y = 0;
     player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
-    if (collide(arena, player)) {
-        gameOver();
-    }
+    if (collide(arena, player)) gameOver();
     canHold = true;
 }
 
@@ -278,12 +286,12 @@ function gameOver() {
 
 function restartGame() {
     paused = false;
+    refillBag();
+    nextPiece = createNextPiece();
     document.getElementById('pauseButton').innerText = '一時停止';
     document.getElementById('gameOver').style.display = 'none';
     playerReset();
     update();
-
-    // 落下速度を初期化
     dropInterval = 1000;
 
     if (!sounds.bgm.playing()) {
@@ -297,7 +305,7 @@ function restartGame() {
     document.getElementById('soundButton').style.display = 'block';
     document.getElementById('pauseButton').style.display = 'block';
     document.getElementById('startButton').style.display = 'none';
-    if (window.innerWidth <= 768) { // 768px以下をスマホと仮定
+    if (window.innerWidth <= 768) {
         document.getElementById('mobileControls').style.display = 'flex';
         document.getElementById('controls').style.display = 'none';
     }
@@ -316,18 +324,17 @@ function playerRotate(dir) {
             return;
         }
     }
-    sounds.pieceRotate.play(); // 回転音を再生
+    sounds.pieceRotate.play();
 }
 
 let dropCounter = 0;
 let dropInterval = 1000;
-
 let holdPiece = null;
 let canHold = true;
 
 function getGhostPosition(arena, player) {
     let y = player.pos.y;
-    const tempPlayer = { ...player, pos: { ...player.pos } }; // player.posのコピーを作成
+    const tempPlayer = { ...player, pos: { ...player.pos } };
     while (true) {
         tempPlayer.pos.y++;
         if (collide(arena, tempPlayer)) {
@@ -335,8 +342,7 @@ function getGhostPosition(arena, player) {
             break;
         }
     }
-    const ghostY = tempPlayer.pos.y;
-    return ghostY;
+    return tempPlayer.pos.y;
 }
 
 let lastTime = 0;
@@ -347,13 +353,9 @@ function update(time = 0) {
         dropCounter += deltaTime;
         if (dropCounter > dropInterval) {
             playerDrop();
-            dropCounter = 0; // dropCounterをリセット
-            // スコアに応じてスピードアップ
-            if (player.score > 50 && dropInterval > 500) {
-                dropInterval -= 200;
-            } else if (player.score > 200 && dropInterval > 300) {
-                dropInterval -= 200;
-            }
+            dropCounter = 0;
+            if (player.score > 50 && dropInterval > 500) dropInterval -= 200;
+            else if (player.score > 200 && dropInterval > 300) dropInterval -= 200;
         }
     }
     draw();
@@ -370,7 +372,7 @@ document.addEventListener('keydown', event => {
     else if (event.keyCode === 39) playerMove(1);
     else if (event.keyCode === 40) {
         playerDrop();
-        sounds.pieceMove.play(); // 移動音を再生
+        sounds.pieceMove.play();
     }
     else if (event.keyCode === 81) playerRotate(-1);
     else if (event.keyCode === 87) playerRotate(1);
@@ -382,7 +384,7 @@ document.addEventListener('keydown', event => {
         playerReset();
         arenaSweep();
         updateScore();
-        sounds.piecePlace.play(); // 設置音を再生
+        sounds.piecePlace.play();
     }
 });
 
@@ -402,15 +404,7 @@ function playerHold() {
 }
 
 const colors = [
-    null,
-    '#FF0D72',
-    '#0DC2FF',
-    '#0DFF72',
-    '#F538FF',
-    '#FF8E0D',
-    '#FFE138',
-    '#3877FF',
-    '#808080', // ゴーストブロックの色
+    null, '#FF0D72', '#0DC2FF', '#0DFF72', '#F538FF', '#FF8E0D', '#FFE138', '#3877FF', '#808080'
 ];
 
 const arena = createMatrix(12, 20);
@@ -421,25 +415,10 @@ const player = {
     score: 0,
 };
 
-document.getElementById('leftBtn').addEventListener('click', () => {
-    if (!paused) playerMove(-1);
-});
-
-document.getElementById('rightBtn').addEventListener('click', () => {
-    if (!paused) playerMove(1);
-});
-
-document.getElementById('downBtn').addEventListener('click', () => {
-    if (!paused) {
-        playerDrop();
-        sounds.pieceMove.play();
-    }
-});
-
-document.getElementById('rotateBtn').addEventListener('click', () => {
-    if (!paused) playerRotate(1);
-});
-
+document.getElementById('leftBtn').addEventListener('click', () => { if (!paused) playerMove(-1); });
+document.getElementById('rightBtn').addEventListener('click', () => { if (!paused) playerMove(1); });
+document.getElementById('downBtn').addEventListener('click', () => { if (!paused) { playerDrop(); sounds.pieceMove.play(); } });
+document.getElementById('rotateBtn').addEventListener('click', () => { if (!paused) playerRotate(1); });
 document.getElementById('dropBtn').addEventListener('click', () => {
     if (!paused) {
         while (!collide(arena, player)) player.pos.y++;
@@ -451,7 +430,4 @@ document.getElementById('dropBtn').addEventListener('click', () => {
         sounds.piecePlace.play();
     }
 });
-
-document.getElementById('holdBtn').addEventListener('click', () => {
-    if (!paused) playerHold();
-});
+document.getElementById('holdBtn').addEventListener('click', () => { if (!paused) playerHold(); });
